@@ -1,6 +1,7 @@
 import { Server } from 'http';
 import app from './app';
 import { env } from './app/config/env';
+import { seed } from './app/shared/seed';
 
 
 
@@ -25,6 +26,8 @@ async function bootstrap() {
                 process.exit(1);
             }
         };
+
+        await seed();
 
         // Handle unhandled promise rejections
         process.on('unhandledRejection', (error) => {
