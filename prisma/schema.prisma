@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+enum UserRole {
+  PLATFORM_ADMIN // Can create organizations, view all orgs
+  ORGANIZATION_ADMIN // Can manage users, projects, tasks in their org
+  ORGANIZATION_MEMBER // Can only access assigned tasks
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// MODELS
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique // e.g., "acme-corp" for URLs
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  users    User[]
+  projects Project[]
+  tasks    Task[]
+
+  @@index([slug])
+  @@index([isActive])
+}
+
+model User {
+  id             String   @id @default(uuid())
+  email          String   @unique
+  password       String
+  fullName       String
+  role           UserRole
+  isActive       Boolean  @default(true)
+  organizationId String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  organization  Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignedTasks TaskAssignment[]
+
+  @@index([email])
+  @@index([organizationId])
+  @@index([role])
+}
+
+model Project {
+  id             String    @id @default(uuid())
+  name           String
+  description    String?
+  startDate      DateTime?
+  endDate        DateTime?
+  isActive       Boolean   @default(true)
+  organizationId String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tasks        Task[]
+
+  @@index([organizationId])
+  @@index([isActive])
+}
+
+model Task {
+  id             String       @id @default(uuid())
+  title          String
+  description    String?
+  status         TaskStatus   @default(TODO)
+  priority       TaskPriority @default(MEDIUM)
+  dueDate        DateTime?
+  projectId      String
+  organizationId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  // Relations
+  project      Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignments  TaskAssignment[]
+
+  @@index([projectId])
+  @@index([organizationId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+model TaskAssignment {
+  id         String  @id @default(uuid())
+  taskId     String
+  userId     String
+  assignedBy String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId]) // Prevent duplicate assignments
+  @@index([taskId])
+  @@index([userId])
+}
