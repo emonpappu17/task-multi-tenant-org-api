@@ -26,7 +26,7 @@ app.get('/', (req, res) => {
 });
 
 // Error handling middleware
-// app.use(notFound);
+app.use(notFound);
 app.use(globalErrorHandler);
 
 export default app;

@@ -1,9 +1,10 @@
 import { Response } from "express";
-import { AuthenticatedRequest } from "../../middlewares/authenticate";
+// import { AuthenticatedRequest } from "../../middlewares/authenticate";
 import sendResponse from "../../shared/sendResponse";
 import httpStatus from 'http-status';
 import * as OrganizationService from './organization.service';
 import { generateSlug } from "../../shared/generateSlug";
+import { AuthenticatedRequest } from "../../middlewares/auth";
 
 export const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
     const { name, description } = req.body;
@@ -18,6 +19,25 @@ export const createOrganization = async (req: AuthenticatedRequest, res: Respons
         success: true,
         statusCode: httpStatus.CREATED,
         message: 'Organization created successfully',
+        data: result,
+    });
+};
+
+export const createFirstOrgAdmin = async (req: AuthenticatedRequest, res: Response) => {
+    const { organizationId } = req.params;
+    const { email, password, fullName } = req.body;
+
+    const result = await OrganizationService.createFirstOrgAdminService(
+        organizationId,
+        email,
+        password,
+        fullName
+    );
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.CREATED,
+        message: 'Organization admin created successfully',
         data: result,
     });
 };
