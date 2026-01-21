@@ -13,7 +13,7 @@ const router = Router();
 // Create organization - PLATFORM_ADMIN only
 router.post(
     '/',
-    authCheck(UserRole.ORGANIZATION_ADMIN),
+    authCheck(UserRole.PLATFORM_ADMIN),
     validateRequest(createOrganizationValidation),
     catchAsync(OrganizationController.createOrganization)
 );

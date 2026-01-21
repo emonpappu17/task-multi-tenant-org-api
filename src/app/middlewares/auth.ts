@@ -21,7 +21,11 @@ const authCheck = (...roles: string[]) => {
         next: NextFunction
     ) => {
         try {
-            const token = req.headers.authorization?.split(' ')[1];
+            const token = req.headers.authorization?.split(" ")[1];
+
+            // console.log(req.headers.authorization);
+
+            // console.log('token==>', token);
 
             if (!token) {
                 throw new AppError('You are not authorized', httpStatus.UNAUTHORIZED);
@@ -46,6 +50,9 @@ const authCheck = (...roles: string[]) => {
                 role: decoded.role,
                 organizationId: decoded.organizationId,
             };
+
+            // console.log("decoded==>", decoded);
+            // console.log('roles==>', roles);
 
             if (roles.length && !roles.includes(decoded.role)) {
                 throw new AppError(
