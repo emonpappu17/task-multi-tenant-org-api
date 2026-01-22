@@ -131,3 +131,24 @@ export const updateProjectService = async (
     return updatedProject;
 };
 
+export const deleteProjectService = async (projectId: string, organizationId: string) => {
+    const project = await prisma.project.findUnique({
+        where: { id: projectId },
+    });
+
+    if (!project) {
+        throw new AppError('Project not found', httpStatus.NOT_FOUND);
+    }
+
+    // Ensure project belongs to the organization
+    if (project.organizationId !== organizationId) {
+        throw new AppError('Project does not belong to this organization', httpStatus.FORBIDDEN);
+    }
+
+    await prisma.project.delete({
+        where: { id: projectId },
+    });
+
+    return { message: 'Project deleted successfully' };
+};
+

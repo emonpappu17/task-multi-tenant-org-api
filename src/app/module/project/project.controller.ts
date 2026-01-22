@@ -68,3 +68,16 @@ export const updateProject = async (req: AuthenticatedRequest, res: Response) =>
         data: result,
     });
 };
+
+export const deleteProject = async (req: AuthenticatedRequest, res: Response) => {
+    const organizationId = req?.user?.organizationId as string;
+    const { projectId } = req.params;
+
+    const result = await ProjectService.deleteProjectService(projectId, organizationId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: result.message,
+    });
+};

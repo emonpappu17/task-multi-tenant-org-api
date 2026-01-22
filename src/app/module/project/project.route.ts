@@ -37,9 +37,16 @@ router.get(
 router.patch(
     '/:projectId',
     authCheck(UserRole.ORGANIZATION_ADMIN),
-    authorizeOrganization,
     validateRequest(updateProjectValidation),
     ProjectController.updateProject
 );
+
+// Delete project (Organization Admin only)
+router.delete(
+    '/:projectId',
+    authCheck(UserRole.ORGANIZATION_ADMIN),
+    ProjectController.deleteProject
+);
+
 
 export const projectRoutes = router;
