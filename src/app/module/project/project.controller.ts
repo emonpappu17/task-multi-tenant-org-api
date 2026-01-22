@@ -40,3 +40,17 @@ export const getOrganizationProjects = async (req: AuthenticatedRequest, res: Re
         data: result,
     });
 };
+
+export const getProjectById = async (req: AuthenticatedRequest, res: Response) => {
+    const organizationId = req?.user?.organizationId as string;
+    const { projectId } = req.params;
+
+    const result = await ProjectService.getProjectByIdService(projectId, organizationId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: 'Project retrieved successfully',
+        data: result,
+    });
+};

@@ -25,4 +25,12 @@ router.get(
     catchAsync(ProjectController.getOrganizationProjects)
 );
 
+// Get project by ID
+router.get(
+    '/:projectId',
+    authCheck(),
+    // authorizeOrganization,
+    ProjectController.getProjectById
+);
+
 export const projectRoutes = router;

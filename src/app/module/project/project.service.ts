@@ -73,3 +73,25 @@ export const getOrganizationProjectsService = async (
     };
 };
 
+export const getProjectByIdService = async (projectId: string, organizationId: string) => {
+    const project = await prisma.project.findUnique({
+        where: { id: projectId },
+        include: {
+            tasks: {
+                select: { id: true, title: true, status: true, priority: true, dueDate: true },
+            },
+        },
+    });
+
+    if (!project) {
+        throw new AppError('Project not found', httpStatus.NOT_FOUND);
+    }
+
+    // Ensure project belongs to the organization
+    if (project.organizationId !== organizationId) {
+        throw new AppError('Project does not belong to this organization', httpStatus.FORBIDDEN);
+    }
+
+    return project;
+};
+
