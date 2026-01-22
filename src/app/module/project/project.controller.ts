@@ -24,3 +24,19 @@ export const createProject = async (req: AuthenticatedRequest, res: Response) =>
         data: result,
     });
 };
+
+export const getOrganizationProjects = async (req: AuthenticatedRequest, res: Response) => {
+    // const { organizationId } = req.params;
+    const organizationId = req?.user?.organizationId as string;
+    const page = req.query.page ? parseInt(req.query.page as string) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+
+    const result = await ProjectService.getOrganizationProjectsService(organizationId, page, limit);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: 'Projects retrieved successfully',
+        data: result,
+    });
+};

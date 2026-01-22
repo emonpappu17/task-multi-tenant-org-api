@@ -30,3 +30,46 @@ export const createProjectService = async (
 
     return project;
 };
+
+export const getOrganizationProjectsService = async (
+    organizationId: string,
+    page = 1,
+    limit = 10
+) => {
+    // Check if organization exists
+    const organization = await prisma.organization.findUnique({
+        where: { id: organizationId },
+    });
+
+    if (!organization) {
+        throw new AppError('Organization not found', httpStatus.NOT_FOUND);
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [projects, total] = await Promise.all([
+        prisma.project.findMany({
+            where: { organizationId, isActive: true },
+            skip,
+            take: limit,
+            include: {
+                tasks: {
+                    select: { id: true, title: true, status: true },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+        }),
+        prisma.project.count({ where: { organizationId, isActive: true } }),
+    ]);
+
+    return {
+        data: projects,
+        pagination: {
+            total,
+            page,
+            limit,
+            pages: Math.ceil(total / limit),
+        },
+    };
+};
+

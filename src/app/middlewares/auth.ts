@@ -76,11 +76,11 @@ export const authorizeOrganization = (req: AuthenticatedRequest, res: Response, 
         throw new AppError('User not authenticated', httpStatus.UNAUTHORIZED);
     }
 
-    if (req.user.role === 'PLATFORM_ADMIN') {
-        // Platform admin can access anything
-        next();
-        return;
-    }
+    // if (req.user.role === 'PLATFORM_ADMIN') {
+    //     // Platform admin can access anything
+    //     next();
+    //     return;
+    // }
 
     const organizationId = req.params.organizationId || req.body.organizationId;
 

@@ -17,4 +17,12 @@ router.post(
     catchAsync(ProjectController.createProject)
 );
 
+// Get all projects in organization
+router.get(
+    '/',
+    authCheck(),
+    // authorizeOrganization,
+    catchAsync(ProjectController.getOrganizationProjects)
+);
+
 export const projectRoutes = router;
