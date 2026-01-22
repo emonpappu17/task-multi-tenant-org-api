@@ -1,3 +1,4 @@
+import { UserRole } from "@prisma/client";
 import { prisma } from "../../config/prisma";
 import AppError from "../../utils/AppError";
 import httpStatus from 'http-status';
@@ -86,6 +87,87 @@ export const getProjectTasksService = async (
     };
 };
 
+export const getTaskByIdService = async (
+    taskId: string,
+    organizationId: string,
+    userId?: string,
+    userRole?: string
+) => {
+    const task = await prisma.task.findUnique({
+        where: { id: taskId },
+        include: {
+            assignments: {
+                select: { user: { select: { id: true, email: true, fullName: true } }, createdAt: true },
+            },
+            project: {
+                select: { id: true, name: true },
+            },
+        },
+    });
+
+    if (!task) {
+        throw new AppError('Task not found', httpStatus.NOT_FOUND);
+    }
+
+    // Ensure task belongs to the organization
+    if (task.organizationId !== organizationId) {
+        throw new AppError('Task does not belong to this organization', httpStatus.FORBIDDEN);
+    }
+
+    // Members can only view their assigned tasks
+    if (userRole === UserRole.ORGANIZATION_MEMBER && userId) {
+        const isAssigned = task.assignments.some((assignment) => assignment.user.id === userId);
+        if (!isAssigned) {
+            throw new AppError(
+                'You do not have permission to view this task',
+                httpStatus.FORBIDDEN
+            );
+        }
+    }
+
+    return task;
+};
+
+export const updateTaskService = async (
+    taskId: string,
+    organizationId: string,
+    data: {
+        title?: string;
+        description?: string;
+        status?: string;
+        priority?: string;
+        dueDate?: string;
+    }
+) => {
+    const task = await prisma.task.findUnique({
+        where: { id: taskId },
+    });
+
+    if (!task) {
+        throw new AppError('Task not found', httpStatus.NOT_FOUND);
+    }
+
+    // Ensure task belongs to the organization
+    if (task.organizationId !== organizationId) {
+        throw new AppError('Task does not belong to this organization', httpStatus.FORBIDDEN);
+    }
+
+    const updateData: any = { ...data };
+    if (data.dueDate) updateData.dueDate = new Date(data.dueDate);
+
+    const updatedTask = await prisma.task.update({
+        where: { id: taskId },
+        data: updateData,
+        include: {
+            assignments: {
+                select: { user: { select: { id: true, email: true, fullName: true } } },
+            },
+        },
+    });
+
+    return updatedTask;
+};
+
 export const assignTaskService = async (
     taskId: string,
     organizationId: string,
@@ -144,4 +226,37 @@ export const assignTaskService = async (
     });
 
     return assignment;
+};
+
+export const unassignTaskService = async (
+    taskId: string,
+    organizationId: string,
+    userId: string
+) => {
+    // Check if task exists and belongs to organization
+    const task = await prisma.task.findUnique({
+        where: { id: taskId },
+    });
+
+    if (!task) {
+        throw new AppError('Task not found', httpStatus.NOT_FOUND);
+    }
+
+    if (task.organizationId !== organizationId) {
+        throw new AppError('Task does not belong to this organization', httpStatus.FORBIDDEN);
+    }
+
+    const assignment = await prisma.taskAssignment.findUnique({
+        where: { taskId_userId: { taskId, userId } },
+    });
+
+    if (!assignment) {
+        throw new AppError('User is not assigned to this task', httpStatus.NOT_FOUND);
+    }
+
+    await prisma.taskAssignment.delete({
+        where: { taskId_userId: { taskId, userId } },
+    });
+
+    return { message: 'User unassigned from task successfully' };
 };

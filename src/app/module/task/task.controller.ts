@@ -45,6 +45,40 @@ export const getProjectTasks = async (req: AuthenticatedRequest, res: Response) 
     });
 };
 
+export const getTaskById = async (req: AuthenticatedRequest, res: Response) => {
+    const organizationId = req?.user?.organizationId as string;
+    const { taskId } = req.params;
+
+    const result = await TaskService.getTaskByIdService(
+        taskId,
+        organizationId,
+        req.user?.userId,
+        req.user?.role
+    );
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: 'Task retrieved successfully',
+        data: result,
+    });
+};
+
+export const updateTask = async (req: AuthenticatedRequest, res: Response) => {
+    const organizationId = req?.user?.organizationId as string;
+    const { taskId } = req.params;
+
+    const result = await TaskService.updateTaskService(taskId, organizationId, req.body);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: 'Task updated successfully',
+        data: result,
+    });
+};
+
+
 export const assignTask = async (req: AuthenticatedRequest, res: Response) => {
     // const { organizationId, taskId } = req.params;
     const organizationId = req?.user?.organizationId as string;
@@ -62,6 +96,19 @@ export const assignTask = async (req: AuthenticatedRequest, res: Response) => {
         statusCode: httpStatus.CREATED,
         message: 'Task assigned successfully',
         data: result,
+    });
+};
+
+export const unassignTask = async (req: AuthenticatedRequest, res: Response) => {
+    const organizationId = req?.user?.organizationId as string;
+    const { taskId, userId } = req.body;
+
+    const result = await TaskService.unassignTaskService(taskId, organizationId, userId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: result.message,
     });
 };
 
