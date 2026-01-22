@@ -39,6 +39,53 @@ export const createTaskService = async (
     return task;
 };
 
+export const getProjectTasksService = async (
+    projectId: string,
+    organizationId: string,
+    page = 1,
+    limit = 10
+) => {
+    // Check if project belongs to organization
+    const project = await prisma.project.findUnique({
+        where: { id: projectId },
+    });
+
+    if (!project) {
+        throw new AppError('Project not found', httpStatus.NOT_FOUND);
+    }
+
+    if (project.organizationId !== organizationId) {
+        throw new AppError('Project does not belong to this organization', httpStatus.FORBIDDEN);
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [tasks, total] = await Promise.all([
+        prisma.task.findMany({
+            where: { projectId, organizationId },
+            skip,
+            take: limit,
+            include: {
+                assignments: {
+                    select: { user: { select: { id: true, email: true, fullName: true } } },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+        }),
+        prisma.task.count({ where: { projectId, organizationId } }),
+    ]);
+
+    return {
+        data: tasks,
+        pagination: {
+            total,
+            page,
+            limit,
+            pages: Math.ceil(total / limit),
+        },
+    };
+};
+
 export const assignTaskService = async (
     taskId: string,
     organizationId: string,

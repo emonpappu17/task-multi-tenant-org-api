@@ -12,7 +12,6 @@ const router = Router();
 router.post(
     '/',
     authCheck(UserRole.ORGANIZATION_ADMIN),
-    // authorizeOrganization,
     validateRequest(createProjectValidation),
     catchAsync(ProjectController.createProject)
 );
@@ -21,7 +20,6 @@ router.post(
 router.get(
     '/',
     authCheck(),
-    // authorizeOrganization,
     catchAsync(ProjectController.getOrganizationProjects)
 );
 
@@ -29,7 +27,6 @@ router.get(
 router.get(
     '/:projectId',
     authCheck(),
-    // authorizeOrganization,
     ProjectController.getProjectById
 );
 

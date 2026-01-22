@@ -17,6 +17,15 @@ router.post(
     catchAsync(TaskController.createTask)
 );
 
+// Get all tasks for a project
+router.get(
+    '/:projectId',
+    authCheck(UserRole.ORGANIZATION_ADMIN),
+    // authorizeOrganization,
+    catchAsync(TaskController.getProjectTasks)
+);
+
+
 // Assign task - ORGANIZATION_ADMIN only
 router.post(
     '/assign',
