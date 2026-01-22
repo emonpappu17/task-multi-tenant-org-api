@@ -3,6 +3,7 @@ import { authRoutes } from "../module/auth/auth.route";
 import { organizationRoutes } from "../module/organization/organization.route";
 import { userRoutes } from "../module/user/user.route";
 import { projectRoutes } from "../module/project/project.route";
+import { tasksRoutes } from "../module/task/task.route";
 
 
 export const router = Router();
@@ -23,6 +24,10 @@ const moduleRoutes = [
     {
         path: '/projects',
         route: projectRoutes,
+    },
+    {
+        path: '/tasks',
+        route: tasksRoutes,
     },
 ]
 
