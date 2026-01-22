@@ -15,3 +15,15 @@ export const login = async (req: AuthenticatedRequest, res: Response) => {
         data: result,
     });
 };
+
+
+export const getCurrentUser = async (req: AuthenticatedRequest, res: Response) => {
+    const result = await AuthService.getCurrentUserService(req.user!.userId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: 'User profile retrieved',
+        data: result,
+    });
+};
