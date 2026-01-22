@@ -12,7 +12,6 @@ const router = Router();
 router.post(
     '/',
     authCheck(UserRole.ORGANIZATION_ADMIN),
-    // authorizeOrganization,
     validateRequest(createUserByAdminValidation),
     catchAsync(UserController.createUser)
 );
@@ -21,8 +20,14 @@ router.post(
 router.get(
     '/',
     authCheck(),
-    authorizeOrganization,
     catchAsync(UserController.getOrganizationUsers)
+);
+
+// Get user by ID
+router.get(
+    '/:userId',
+    authCheck(),
+    catchAsync(UserController.getUserById)
 );
 
 

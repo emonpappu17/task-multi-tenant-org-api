@@ -94,3 +94,29 @@ export const getOrganizationUsersService = async (
         },
     };
 };
+
+export const getUserByIdService = async (userId: string, organizationId: string) => {
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+            id: true,
+            email: true,
+            fullName: true,
+            role: true,
+            organizationId: true,
+            isActive: true,
+            createdAt: true,
+        },
+    });
+
+    if (!user) {
+        throw new AppError('User not found', httpStatus.NOT_FOUND);
+    }
+
+    // Ensure user belongs to the organization
+    if (user.organizationId !== organizationId) {
+        throw new AppError('User does not belong to this organization', httpStatus.FORBIDDEN);
+    }
+
+    return user;
+};

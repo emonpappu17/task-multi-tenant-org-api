@@ -38,3 +38,17 @@ export const getOrganizationUsers = async (req: AuthenticatedRequest, res: Respo
         data: result,
     });
 };
+
+export const getUserById = async (req: AuthenticatedRequest, res: Response) => {
+    const organizationId = req?.user?.organizationId as string;
+    const { userId } = req.params;
+
+    const result = await UserService.getUserByIdService(userId, organizationId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: 'User retrieved successfully',
+        data: result,
+    });
+};
