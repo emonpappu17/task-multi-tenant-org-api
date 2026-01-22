@@ -17,5 +17,13 @@ router.post(
     catchAsync(UserController.createUser)
 );
 
+// Get all users in organization - ORGANIZATION_ADMIN and ORGANIZATION_MEMBER can view
+router.get(
+    '/',
+    authCheck(),
+    authorizeOrganization,
+    catchAsync(UserController.getOrganizationUsers)
+);
+
 
 export const userRoutes = router;

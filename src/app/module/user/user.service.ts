@@ -49,3 +49,48 @@ export const createUserService = async (
         organizationId: user.organizationId,
     };
 };
+
+export const getOrganizationUsersService = async (
+    organizationId: string,
+    page = 1,
+    limit = 10
+) => {
+    // Check if organization exists
+    const organization = await prisma.organization.findUnique({
+        where: { id: organizationId },
+    });
+
+    if (!organization) {
+        throw new AppError('Organization not found', httpStatus.NOT_FOUND);
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [users, total] = await Promise.all([
+        prisma.user.findMany({
+            where: { organizationId },
+            skip,
+            take: limit,
+            select: {
+                id: true,
+                email: true,
+                fullName: true,
+                role: true,
+                isActive: true,
+                createdAt: true,
+            },
+            orderBy: { createdAt: 'desc' },
+        }),
+        prisma.user.count({ where: { organizationId } }),
+    ]);
+
+    return {
+        data: users,
+        pagination: {
+            total,
+            page,
+            limit,
+            pages: Math.ceil(total / limit),
+        },
+    };
+};
