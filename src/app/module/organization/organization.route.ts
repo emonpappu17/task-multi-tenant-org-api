@@ -3,7 +3,7 @@ import { Router } from "express";
 import authCheck from "../../middlewares/auth";
 import validateRequest from "../../middlewares/validateRequest";
 import catchAsync from "../../shared/catchAsync";
-import { createOrganizationValidation } from "./organization.validation";
+import { createFirstOrgAdminValidation, createOrganizationValidation } from "./organization.validation";
 import * as OrganizationController from './organizatoin.controller';
 
 const router = Router();
@@ -20,6 +20,7 @@ router.post(
 router.post(
     '/:organizationId/create-first-admin',
     authCheck(UserRole.PLATFORM_ADMIN),
+    validateRequest(createFirstOrgAdminValidation),
     catchAsync(OrganizationController.createFirstOrgAdmin)
 );
 
