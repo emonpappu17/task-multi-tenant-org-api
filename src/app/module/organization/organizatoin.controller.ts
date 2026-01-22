@@ -67,3 +67,15 @@ export const createFirstOrgAdmin = async (req: AuthenticatedRequest, res: Respon
         data: result,
     });
 };
+
+export const updateOrganization = async (req: AuthenticatedRequest, res: Response) => {
+  const { organizationId } = req.params;
+  const result = await OrganizationService.updateOrganizationService(organizationId, req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Organization updated successfully',
+    data: result,
+  });
+};

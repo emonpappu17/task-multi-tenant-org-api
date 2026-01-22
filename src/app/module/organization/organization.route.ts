@@ -3,7 +3,7 @@ import { Router } from "express";
 // import authCheck from "../../middlewares/auth";
 import validateRequest from "../../middlewares/validateRequest";
 import catchAsync from "../../shared/catchAsync";
-import { createFirstOrgAdminValidation, createOrganizationValidation } from "./organization.validation";
+import { createFirstOrgAdminValidation, createOrganizationValidation, updateOrganizationValidation } from "./organization.validation";
 import * as OrganizationController from './organizatoin.controller';
 import { authCheck, authorizeOrganization } from "../../middlewares/auth";
 
@@ -39,6 +39,14 @@ router.post(
     authCheck(UserRole.PLATFORM_ADMIN),
     validateRequest(createFirstOrgAdminValidation),
     catchAsync(OrganizationController.createFirstOrgAdmin)
+);
+
+// Update organization - PLATFORM_ADMIN only
+router.patch(
+    '/:organizationId',
+    authCheck(UserRole.PLATFORM_ADMIN),
+    validateRequest(updateOrganizationValidation),
+    catchAsync(OrganizationController.updateOrganization)
 );
 
 

@@ -3,6 +3,7 @@ import AppError from "../../utils/AppError";
 import httpStatus from 'http-status';
 import bcrypt from "bcrypt"
 import { UserRole } from "@prisma/client";
+import { generateSlug } from "../../shared/generateSlug";
 
 export const createOrganizationService = async (
     name: string,
@@ -138,4 +139,85 @@ export const createFirstOrgAdminService = async (
         role: user.role,
         organizationId: user.organizationId,
     };
+};
+
+// export const updateOrganizationService = async (
+//     organizationId: string,
+//     data: { name?: string; description?: string; isActive?: boolean }
+// ) => {
+//     // Check if organization exists
+//     const organization = await prisma.organization.findUnique({
+//         where: { id: organizationId },
+//     });
+
+//     if (!organization) {
+//         throw new AppError('Organization not found', httpStatus.NOT_FOUND);
+//     }
+
+//     const slug = await generateSlug(data.name as string);
+
+//     // Check if new slug is unique (if provided)
+//     if (slug && slug !== organization.slug) {
+//         const existingSlug = await prisma.organization.findUnique({
+//             where: { slug: slug },
+//         });
+//         if (existingSlug) {
+//             throw new AppError('Organization slug already exists', httpStatus.CONFLICT);
+//         }
+//     }
+
+//     const updatedOrg = await prisma.organization.update({
+//         where: { id: organizationId },
+//         data,
+//     });
+
+//     return updatedOrg;
+// };
+
+
+export const updateOrganizationService = async (
+    organizationId: string,
+    data: {
+        name?: string;
+        description?: string;
+        isActive?: boolean;
+    }
+) => {
+    const organization = await prisma.organization.findUnique({
+        where: { id: organizationId },
+    });
+
+    if (!organization) {
+        throw new AppError('Organization not found', httpStatus.NOT_FOUND);
+    }
+
+    const updateData: typeof data & { slug?: string } = { ...data };
+
+    // Only regenerate slug if name is provided AND changed
+    if (data.name && data.name !== organization.name) {
+        const newSlug = await generateSlug(data.name);
+
+        // Extra safety: avoid same slug
+        if (newSlug !== organization.slug) {
+            const existingSlug = await prisma.organization.findUnique({
+                where: { slug: newSlug },
+            });
+
+            if (existingSlug) {
+                throw new AppError(
+                    'Organization slug already exists',
+                    httpStatus.CONFLICT
+                );
+            }
+
+            updateData.slug = newSlug;
+        }
+    }
+
+    const updatedOrg = await prisma.organization.update({
+        where: { id: organizationId },
+        data: updateData,
+    });
+
+    return updatedOrg;
 };
