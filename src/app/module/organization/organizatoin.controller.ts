@@ -37,6 +37,18 @@ export const getAllOrganizations = async (req: AuthenticatedRequest, res: Respon
     });
 };
 
+export const getOrganizationById = async (req: AuthenticatedRequest, res: Response) => {
+    const { organizationId } = req.params;
+    const result = await OrganizationService.getOrganizationByIdService(organizationId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: 'Organization retrieved successfully',
+        data: result,
+    });
+};
+
 export const createFirstOrgAdmin = async (req: AuthenticatedRequest, res: Response) => {
     const { organizationId } = req.params;
     const { email, password, fullName } = req.body;

@@ -5,7 +5,7 @@ import validateRequest from "../../middlewares/validateRequest";
 import catchAsync from "../../shared/catchAsync";
 import { createFirstOrgAdminValidation, createOrganizationValidation } from "./organization.validation";
 import * as OrganizationController from './organizatoin.controller';
-import { authCheck } from "../../middlewares/auth";
+import { authCheck, authorizeOrganization } from "../../middlewares/auth";
 
 const router = Router();
 
@@ -22,6 +22,14 @@ router.get(
     '/',
     authCheck(UserRole.PLATFORM_ADMIN),
     catchAsync(OrganizationController.getAllOrganizations)
+);
+
+// Get organization by ID
+router.get(
+    '/:organizationId',
+    authCheck(),
+    authorizeOrganization,
+    catchAsync(OrganizationController.getOrganizationById)
 );
 
 

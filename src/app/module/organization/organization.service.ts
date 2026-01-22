@@ -61,6 +61,27 @@ export const getAllOrganizationsService = async (page = 1, limit = 10) => {
     };
 };
 
+export const getOrganizationByIdService = async (organizationId: string) => {
+    const organization = await prisma.organization.findUnique({
+        where: { id: organizationId },
+        include: {
+            users: {
+                select: { id: true, email: true, fullName: true, role: true, isActive: true },
+            },
+            projects: {
+                select: { id: true, name: true, isActive: true },
+            },
+        },
+    });
+
+    if (!organization) {
+        throw new AppError('Organization not found', httpStatus.NOT_FOUND);
+    }
+
+    return organization;
+};
+
+
 export const createFirstOrgAdminService = async (
     organizationId: string,
     email: string,
