@@ -2,6 +2,7 @@ import { prisma } from "../../config/prisma";
 import httpStatus from 'http-status';
 import bcrypt from 'bcrypt';
 import AppError from "../../utils/AppError";
+import { UserRole } from "@prisma/client";
 
 export const createUserService = async (
     organizationId: string,
@@ -155,4 +156,43 @@ export const updateUserService = async (
     });
 
     return updatedUser;
+};
+
+export const deleteUserService = async (userId: string, organizationId: string) => {
+    // Get the user
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+    });
+
+    if (!user) {
+        throw new AppError('User not found', httpStatus.NOT_FOUND);
+    }
+
+    // Ensure user belongs to the organization
+    if (user.organizationId !== organizationId) {
+        throw new AppError('User does not belong to this organization', httpStatus.FORBIDDEN);
+    }
+
+    // Prevent deleting the last admin
+    if (user.role === UserRole.ORGANIZATION_ADMIN) {
+        const adminCount = await prisma.user.count({
+            where: {
+                organizationId,
+                role: UserRole.ORGANIZATION_ADMIN,
+            },
+        });
+
+        if (adminCount === 1) {
+            throw new AppError(
+                'Cannot delete the last organization admin',
+                httpStatus.BAD_REQUEST
+            );
+        }
+    }
+
+    await prisma.user.delete({
+        where: { id: userId },
+    });
+
+    return { message: 'User deleted successfully' };
 };

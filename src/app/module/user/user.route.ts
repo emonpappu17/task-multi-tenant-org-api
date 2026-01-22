@@ -38,5 +38,12 @@ router.patch(
     catchAsync(UserController.updateUser)
 );
 
+// Delete user - ORGANIZATION_ADMIN only
+router.delete(
+    '/:userId',
+    authCheck(UserRole.ORGANIZATION_ADMIN),
+    catchAsync(UserController.deleteUser)
+);
+
 
 export const userRoutes = router;

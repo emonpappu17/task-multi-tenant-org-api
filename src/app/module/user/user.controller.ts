@@ -66,3 +66,16 @@ export const updateUser = async (req: AuthenticatedRequest, res: Response) => {
         data: result,
     });
 };
+
+export const deleteUser = async (req: AuthenticatedRequest, res: Response) => {
+    const organizationId = req?.user?.organizationId as string;
+    const { userId } = req.params;
+
+    const result = await UserService.deleteUserService(userId, organizationId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: result.message,
+    });
+};
