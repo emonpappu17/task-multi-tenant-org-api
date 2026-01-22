@@ -14,7 +14,7 @@ export interface AuthenticatedRequest extends Request {
     };
 }
 
-const authCheck = (...roles: string[]) => {
+export const authCheck = (...roles: string[]) => {
     return async (
         req: AuthenticatedRequest,
         res: Response,
@@ -23,9 +23,9 @@ const authCheck = (...roles: string[]) => {
         try {
             const token = req.headers.authorization?.split(" ")[1];
 
-            // console.log(req.headers.authorization);
+            console.log(req.headers.authorization);
 
-            // console.log('token==>', token);
+            console.log('token==>', token);
 
             if (!token) {
                 throw new AppError('You are not authorized', httpStatus.UNAUTHORIZED);
@@ -51,8 +51,8 @@ const authCheck = (...roles: string[]) => {
                 organizationId: decoded.organizationId,
             };
 
-            // console.log("decoded==>", decoded);
-            // console.log('roles==>', roles);
+            console.log("decoded==>", decoded);
+            console.log('roles==>', roles);
 
             if (roles.length && !roles.includes(decoded.role)) {
                 throw new AppError(
@@ -68,4 +68,30 @@ const authCheck = (...roles: string[]) => {
     };
 };
 
-export default authCheck;
+
+
+// For org-specific routes
+export const authorizeOrganization = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    if (!req.user) {
+        throw new AppError('User not authenticated', httpStatus.UNAUTHORIZED);
+    }
+
+    // if (req.user.role === 'PLATFORM_ADMIN') {
+    //     // Platform admin can access anything
+    //     next();
+    //     return;
+    // }
+
+    const organizationId = req.params.organizationId || req.body.organizationId;
+
+    console.log('organizationId==>', organizationId);
+
+    if (req.user.role !== 'PLATFORM_ADMIN' && req.user.organizationId !== organizationId) {
+        throw new AppError(
+            'You do not have permission to access this organization',
+            httpStatus.FORBIDDEN
+        );
+    }
+
+    next();
+};

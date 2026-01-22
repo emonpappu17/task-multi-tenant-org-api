@@ -1,10 +1,11 @@
 import { UserRole } from "@prisma/client";
 import { Router } from "express";
-import authCheck from "../../middlewares/auth";
+// import authCheck from "../../middlewares/auth";
 import validateRequest from "../../middlewares/validateRequest";
 import catchAsync from "../../shared/catchAsync";
 import { createFirstOrgAdminValidation, createOrganizationValidation } from "./organization.validation";
 import * as OrganizationController from './organizatoin.controller';
+import { authCheck } from "../../middlewares/auth";
 
 const router = Router();
 
