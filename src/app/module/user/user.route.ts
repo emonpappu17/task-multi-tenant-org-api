@@ -19,7 +19,7 @@ router.post(
 // Get all users in organization - ORGANIZATION_ADMIN and ORGANIZATION_MEMBER can view
 router.get(
     '/',
-    authCheck(),
+    authCheck(UserRole.ORGANIZATION_ADMIN, UserRole.ORGANIZATION_MEMBER),
     catchAsync(UserController.getOrganizationUsers)
 );
 
