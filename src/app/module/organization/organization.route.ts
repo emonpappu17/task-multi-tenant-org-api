@@ -17,6 +17,14 @@ router.post(
     catchAsync(OrganizationController.createOrganization)
 );
 
+// Get all organizations - PLATFORM_ADMIN only
+router.get(
+    '/',
+    authCheck(UserRole.PLATFORM_ADMIN),
+    catchAsync(OrganizationController.getAllOrganizations)
+);
+
+
 // Create first org admin for organization - PLATFORM_ADMIN only
 router.post(
     '/:organizationId/create-first-admin',

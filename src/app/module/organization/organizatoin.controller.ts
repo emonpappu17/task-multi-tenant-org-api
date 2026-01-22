@@ -23,6 +23,20 @@ export const createOrganization = async (req: AuthenticatedRequest, res: Respons
     });
 };
 
+export const getAllOrganizations = async (req: AuthenticatedRequest, res: Response) => {
+    const page = req.query.page ? parseInt(req.query.page as string) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+
+    const result = await OrganizationService.getAllOrganizationsService(page, limit);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: 'Organizations retrieved successfully',
+        data: result,
+    });
+};
+
 export const createFirstOrgAdmin = async (req: AuthenticatedRequest, res: Response) => {
     const { organizationId } = req.params;
     const { email, password, fullName } = req.body;

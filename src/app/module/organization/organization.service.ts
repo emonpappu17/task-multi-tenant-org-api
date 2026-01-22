@@ -29,6 +29,38 @@ export const createOrganizationService = async (
     return organization;
 };
 
+export const getAllOrganizationsService = async (page = 1, limit = 10) => {
+    const skip = (page - 1) * limit;
+
+    const [organizations, total] = await Promise.all([
+        prisma.organization.findMany({
+            skip,
+            take: limit,
+            where: { isActive: true },
+            include: {
+                users: {
+                    select: { id: true, email: true, fullName: true, role: true },
+                },
+                projects: {
+                    select: { id: true, name: true },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+        }),
+        prisma.organization.count({ where: { isActive: true } }),
+    ]);
+
+    return {
+        data: organizations,
+        pagination: {
+            total,
+            page,
+            limit,
+            pages: Math.ceil(total / limit),
+        },
+    };
+};
+
 export const createFirstOrgAdminService = async (
     organizationId: string,
     email: string,
