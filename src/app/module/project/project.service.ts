@@ -95,3 +95,39 @@ export const getProjectByIdService = async (projectId: string, organizationId: s
     return project;
 };
 
+export const updateProjectService = async (
+    projectId: string,
+    organizationId: string,
+    data: {
+        name?: string;
+        description?: string;
+        startDate?: string;
+        endDate?: string;
+        isActive?: boolean;
+    }
+) => {
+    const project = await prisma.project.findUnique({
+        where: { id: projectId },
+    });
+
+    if (!project) {
+        throw new AppError('Project not found', httpStatus.NOT_FOUND);
+    }
+
+    // Ensure project belongs to the organization
+    if (project.organizationId !== organizationId) {
+        throw new AppError('Project does not belong to this organization', httpStatus.FORBIDDEN);
+    }
+
+    const updateData: any = { ...data };
+    if (data.startDate) updateData.startDate = new Date(data.startDate);
+    if (data.endDate) updateData.endDate = new Date(data.endDate);
+
+    const updatedProject = await prisma.project.update({
+        where: { id: projectId },
+        data: updateData,
+    });
+
+    return updatedProject;
+};
+

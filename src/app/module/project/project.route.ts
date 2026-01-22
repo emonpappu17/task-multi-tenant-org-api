@@ -3,7 +3,7 @@ import { authCheck, authorizeOrganization } from "../../middlewares/auth";
 import { UserRole } from "@prisma/client";
 import validateRequest from "../../middlewares/validateRequest";
 import catchAsync from "../../shared/catchAsync";
-import { createProjectValidation } from "./project.validation";
+import { createProjectValidation, updateProjectValidation } from "./project.validation";
 import * as ProjectController from './project.controller';
 
 const router = Router();
@@ -31,6 +31,15 @@ router.get(
     authCheck(),
     // authorizeOrganization,
     ProjectController.getProjectById
+);
+
+// Update project (Organization Admin only)
+router.patch(
+    '/:projectId',
+    authCheck(UserRole.ORGANIZATION_ADMIN),
+    authorizeOrganization,
+    validateRequest(updateProjectValidation),
+    ProjectController.updateProject
 );
 
 export const projectRoutes = router;

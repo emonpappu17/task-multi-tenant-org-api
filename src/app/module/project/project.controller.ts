@@ -54,3 +54,17 @@ export const getProjectById = async (req: AuthenticatedRequest, res: Response) =
         data: result,
     });
 };
+
+export const updateProject = async (req: AuthenticatedRequest, res: Response) => {
+    const organizationId = req?.user?.organizationId as string;
+    const { projectId } = req.params;
+
+    const result = await ProjectService.updateProjectService(projectId, organizationId, req.body);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: 'Project updated successfully',
+        data: result,
+    });
+};
