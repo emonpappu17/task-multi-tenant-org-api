@@ -24,5 +24,6 @@ export const updateTaskValidation = z.object({
 export const assignTaskValidation = z.object({
     body: z.object({
         userId: z.string().uuid('Invalid user ID'),
+        taskId: z.string().uuid('Invalid user ID'),
     }),
 });

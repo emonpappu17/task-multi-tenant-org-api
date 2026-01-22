@@ -38,3 +38,63 @@ export const createTaskService = async (
 
     return task;
 };
+
+export const assignTaskService = async (
+    taskId: string,
+    organizationId: string,
+    userId: string,
+    assignedByUserId: string
+) => {
+    // Check if task exists and belongs to organization
+    const task = await prisma.task.findUnique({
+        where: { id: taskId },
+    });
+
+    if (!task) {
+        throw new AppError('Task not found', httpStatus.NOT_FOUND);
+    }
+
+    if (task.organizationId !== organizationId) {
+        throw new AppError('Task does not belong to this organization', httpStatus.FORBIDDEN);
+    }
+
+    // Check if user exists and belongs to organization
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+    });
+
+    if (!user) {
+        throw new AppError('User not found', httpStatus.NOT_FOUND);
+    }
+
+    if (user.organizationId !== organizationId) {
+        throw new AppError('User does not belong to this organization', httpStatus.FORBIDDEN);
+    }
+
+    // Check if already assigned
+    const existingAssignment = await prisma.taskAssignment.findUnique({
+        where: { taskId_userId: { taskId, userId } },
+    });
+
+    if (existingAssignment) {
+        throw new AppError('User is already assigned to this task', httpStatus.CONFLICT);
+    }
+
+    const assignment = await prisma.taskAssignment.create({
+        data: {
+            taskId,
+            userId,
+            assignedBy: assignedByUserId,
+        },
+        include: {
+            user: {
+                select: { id: true, email: true, fullName: true },
+            },
+            task: {
+                select: { id: true, title: true },
+            },
+        },
+    });
+
+    return assignment;
+};

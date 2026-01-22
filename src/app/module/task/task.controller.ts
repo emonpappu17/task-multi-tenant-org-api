@@ -26,3 +26,23 @@ export const createTask = async (req: AuthenticatedRequest, res: Response) => {
         data: result,
     });
 };
+
+export const assignTask = async (req: AuthenticatedRequest, res: Response) => {
+    // const { organizationId, taskId } = req.params;
+    const organizationId = req?.user?.organizationId as string;
+    const { userId, taskId } = req.body;
+
+    const result = await TaskService.assignTaskService(
+        taskId,
+        organizationId,
+        userId,
+        req.user!.userId
+    );
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.CREATED,
+        message: 'Task assigned successfully',
+        data: result,
+    });
+};
