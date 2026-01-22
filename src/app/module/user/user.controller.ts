@@ -52,3 +52,17 @@ export const getUserById = async (req: AuthenticatedRequest, res: Response) => {
         data: result,
     });
 };
+
+export const updateUser = async (req: AuthenticatedRequest, res: Response) => {
+    const organizationId = req?.user?.organizationId as string;
+    const { userId } = req.params;
+
+    const result = await UserService.updateUserService(userId, organizationId, req.body);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: 'User updated successfully',
+        data: result,
+    });
+};

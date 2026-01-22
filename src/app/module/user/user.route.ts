@@ -3,7 +3,7 @@ import { authCheck, authorizeOrganization } from "../../middlewares/auth";
 import { UserRole } from "@prisma/client";
 import validateRequest from "../../middlewares/validateRequest";
 import catchAsync from "../../shared/catchAsync";
-import { createUserByAdminValidation } from "./user.validation";
+import { createUserByAdminValidation, updateUserValidation } from "./user.validation";
 import * as UserController from './user.controller';
 
 const router = Router();
@@ -28,6 +28,14 @@ router.get(
     '/:userId',
     authCheck(),
     catchAsync(UserController.getUserById)
+);
+
+// Update user - ORGANIZATION_ADMIN only
+router.patch(
+    '/:userId',
+    authCheck(UserRole.ORGANIZATION_ADMIN),
+    validateRequest(updateUserValidation),
+    catchAsync(UserController.updateUser)
 );
 
 

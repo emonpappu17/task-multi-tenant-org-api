@@ -120,3 +120,39 @@ export const getUserByIdService = async (userId: string, organizationId: string)
 
     return user;
 };
+
+export const updateUserService = async (
+    userId: string,
+    organizationId: string,
+    data: { fullName?: string; isActive?: boolean }
+) => {
+    // Get the user
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+    });
+
+    if (!user) {
+        throw new AppError('User not found', httpStatus.NOT_FOUND);
+    }
+
+    // Ensure user belongs to the organization
+    if (user.organizationId !== organizationId) {
+        throw new AppError('User does not belong to this organization', httpStatus.FORBIDDEN);
+    }
+
+    const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data,
+        select: {
+            id: true,
+            email: true,
+            fullName: true,
+            role: true,
+            organizationId: true,
+            isActive: true,
+            createdAt: true,
+        },
+    });
+
+    return updatedUser;
+};
