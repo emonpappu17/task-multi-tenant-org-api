@@ -39,13 +39,7 @@ This API enables multiple client organizations to operate independently within a
 
 PostgreSQL was chosen for the following reasons:
 
-1. **ACID Compliance**: Ensures data integrity in a multi-tenant environment where data isolation is critical
-2. **Strong Foreign Key Constraints**: Prevents cross-organization data access at the database level
-3. **Indexes & Performance**: Optimized query performance with proper indexing on frequently accessed fields
-4. **JSON Support**: Flexibility for future extensions
-5. **Open Source**: No licensing costs, widely adopted
-6. **Scalability**: Handles complex queries and relationships efficiently
-7. **Transactional Support**: Ensures consistency in multi-step operations
+I chose PostgreSQL over MongoDB because this system is highly relational (organizations, users, projects, tasks). PostgreSQL enforces strict data integrity with foreign keys, which helps prevent cross-organization access at the database level. This makes authorization safer and more reliable for a multi-tenant backend.
 
 ## Folder Structure
 
